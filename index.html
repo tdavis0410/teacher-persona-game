@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get to Know Your Teacher Persona!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #e0f2fe;
+            padding: 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.3em;
+            color: #64748b;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+        
+        .persona-link {
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+        
+        .persona-link a {
+            color: #4299e1;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .persona-link a:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+        
+        .instructions {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .instructions h2 {
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 15px;
+            line-height: 1.6;
+            color: #334155;
+        }
+        
+        .instructions strong {
+            color: #1e293b;
+        }
+        
+        .game-board {
+            background: #e0f2fe;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .zoom-controls {
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        
+        .zoom-btn {
+            background: white;
+            border: 2px solid #4299e1;
+            color: #4299e1;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .zoom-btn:hover {
+            background: #4299e1;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .zoom-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .move-forward-btn {
+            border-color: #10b981;
+            color: #10b981;
+        }
+        
+        .move-forward-btn:hover {
+            background: #10b981;
+            color: white;
+        }
+        
+        .move-backward-btn {
+            border-color: #f97316;
+            color: #f97316;
+        }
+        
+        .move-backward-btn:hover {
+            background: #f97316;
+            color: white;
+        }
+        
+        .reset-btn {
+            border-color: #8b5cf6;
+            color: #8b5cf6;
+        }
+        
+        .reset-btn:hover {
+            background: #8b5cf6;
+            color: white;
+        }
+        
+        .board-container {
+            overflow: auto;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        
+        .board-wrapper {
+            transition: transform 0.3s ease;
+            transform-origin: center center;
+        }
+        
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            max-width: 100%;
+        }
+        
+        .space {
+            background: white;
+            border: 3px solid #4299e1;
+            border-radius: 12px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            min-height: 200px;
+        }
+        
+        .space:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(66, 153, 225, 0.4);
+            border-color: #2563eb;
+        }
+        
+        .space.visited {
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+            border-color: #0ea5e9;
+        }
+        
+        .space.current {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.2);
+            }
+        }
+        
+        .space-number {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 35px;
+            height: 35px;
+            background: #4299e1;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+        
+        .space:hover .space-number {
+            transform: scale(1.15) rotate(5deg);
+            background: #2563eb;
+        }
+        
+        .space.visited .space-number {
+            background: #0ea5e9;
+        }
+        
+        .space.current .space-number {
+            background: #f59e0b;
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .space-text {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 1.05em;
+            color: #1e293b;
+            padding-top: 45px;
+            line-height: 1.5;
+        }
+        
+        .movement {
+            margin-top: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+            overflow-x: auto;
+        }
+        
+        .movement-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .movement-table th {
+            padding: 6px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .movement-table td {
+            padding: 8px;
+            text-align: center;
+            line-height: 1.3;
+            font-size: 0.95em;
+        }
+        
+        .movement-header-backward {
+            background: #f97316;
+            color: white;
+            border-radius: 6px 0 0 0;
+        }
+        
+        .movement-header-forward {
+            background: #3b82f6;
+            color: white;
+            border-radius: 0 6px 0 0;
+        }
+        
+        .movement-cell-backward {
+            background: #ffedd5;
+            color: #c2410c;
+            border-left: 3px solid #f97316;
+            border-bottom: 3px solid #f97316;
+            border-radius: 0 0 0 6px;
+        }
+        
+        .movement-cell-forward {
+            background: #dbeafe;
+            color: #1e40af;
+            border-right: 3px solid #3b82f6;
+            border-bottom: 3px solid #3b82f6;
+            border-radius: 0 0 6px 0;
+        }
+        
+        .start-finish {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border: 3px solid #d97706;
+            color: #78350f;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .start-finish .space-text {
+            color: #78350f;
+            padding-top: 10px;
+        }
+        
+        .start-finish .movement {
+            background: rgba(255, 255, 255, 0.5);
+            color: #78350f;
+        }
+        
+        .lounge-section {
+            background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .lounge-section h2 {
+            color: #5b21b6;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .lounge-description {
+            color: #6b21a8;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            font-size: 1.1em;
+        }
+        
+        .card-deck {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .lounge-card {
+            background: white;
+            border: 3px solid #8b5cf6;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .lounge-card:hover {
+            transform: translateY(-8px) rotate(1deg);
+            box-shadow: 0 15px 35px rgba(139, 92, 246, 0.4);
+            border-color: #7c3aed;
+        }
+        
+        .lounge-card:active {
+            transform: translateY(-4px) rotate(0deg);
+        }
+        
+        .card-text {
+            color: #1e293b;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            padding-right: 60px;
+        }
+        
+        .card-movement {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1em;
+        }
+        
+        .card-icon {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5em;
+        }
+        
+        .debrief {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 12px;
+            padding: 30px;
+        }
+        
+        .debrief h2 {
+            color: #92400e;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .debrief ul {
+            margin-left: 20px;
+        }
+        
+        .debrief li {
+            margin-bottom: 12px;
+            line-height: 1.6;
+            color: #78350f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍎 Get to Know Your Teacher Persona!</h1>
+            <p class="subtitle">Will your teacher make it? What might derail them along the way?</p>
+            <p class="persona-link">
+                <a href="YOUR_LINK_HERE" target="_blank">Click here to view your persona.</a>
+            </p>
+        </header>
+        
+        <div class="instructions">
+            <h2>📋 How to Play (10 minutes)</h2>
+            <p style="margin-bottom: 15px;"><strong>The Goal:</strong> Get your teacher from START to FINISH - will they make it or get derailed?</p>
+            <ol>
+                <li>Begin at START and follow the path.</li>
+                <li>Take time to discuss the scenario and a movement based on the context and details in your persona's profile.</li>
+                <li>Choose an action (i.e. forward or backward) based on how you think your persona would respond. If you find yourself caught in a loop, visit the Teacher's Lounge for an extra boost!</li>
+                <li>Every touchpoint will bring your teacher closer or farther away from the finish.</li>
+                <li>When you reach the finish, scroll to the Debrief Questions and discuss.</li>
+            </ol>
+            <p style="margin-top: 20px; padding: 15px; background: rgba(66, 153, 225, 0.1); border-radius: 8px; color: #1e293b;">
+                <strong>⌨️ Keyboard Controls:</strong> Use Arrow keys (→↑ to move forward, ←↓ to move backward) • Press R to reset the game
+            </p>
+        </div>
+        
+        <div class="game-board">
+            <div class="zoom-controls">
+                <button class="zoom-btn move-backward-btn" onclick="moveBackward()" title="Move backward (or press ← ↓)">
+                    <span>⬅️</span>
+                    <span>Move Back</span>
+                </button>
+                <button class="zoom-btn move-forward-btn" onclick="moveForward()" title="Move forward (or press → ↑)">
+                    <span>➡️</span>
+                    <span>Move Forward</span>
+                </button>
+                <button class="zoom-btn reset-btn" onclick="resetGame()" title="Reset game (or press R)">
+                    <span>🔄</span>
+                    <span>Reset Game</span>
+                </button>
+                <div style="width: 20px;"></div>
+                <button class="zoom-btn" onclick="zoomOut()">
+                    <span>🔍−</span>
+                    <span>Zoom Out</span>
+                </button>
+                <button class="zoom-btn" onclick="resetZoom()">
+                    <span>↺</span>
+                    <span>Reset View</span>
+                </button>
+                <button class="zoom-btn" onclick="zoomIn()">
+                    <span>🔍+</span>
+                    <span>Zoom In</span>
+                </button>
+            </div>
+            <div class="board-container">
+                <div class="board-wrapper" id="boardWrapper">
+                    <div class="board-grid">
+                        <!-- Row 1 -->
+                        <div class="space start-finish" onclick="markSpace(this)">
+                            <div class="space-text">🎯 START 🎯<br><br>You hear about a new social studies site from a trusted colleague who says, "My students loved it!!" You decide to check it out.</div>
+                            <div class="movement">(+3) Start exploring!</div>
+                        </div>
+                        <div class="space" onclick="markSpace(this)">
+                            <div class="space-number">1</div>
+                            <div class="space-text">You have 15 minutes to explore the site before planning tomorrow's lesson</div>
+                            <div class="movement">
+                                <table class="movement-table">
+                                    <tr>
+                                        <th class="movement-header-backward">↓ BACKWARD</th>
+                                        <th class="movement-header-forward">↑ FORWARD</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="movement-cell-backward">You struggle to get what you need (-1)</td>
+                                        <td class="movement-cell-forward">You find what you need (+3)</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="space" onclick="markSpace(this)">
+                            <div class="space-number">2</div>
+                            <div class="space-text">You discover a comprehensive, free curriculum.</div>
+                            <div class="movement">
+                                <table class="movement-table">
+                                    <tr>
+                                        <th class="movement-header-backward">↓ BACKWARD</th>
+                                        <th class="movement-header-forward">↑ FORWARD</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="movement-cell-backward">District buys from publishers or makes its own (-1)</td>
+                                        <td class="movement-cell-forward">Free wins! It's worth a try (+3)</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="space" onclick="markSpace(this)">
+                            <div class="space-number">3</div>
+                            <div class="space-text">You find a resource on the topic you need. The lesson takes 45 min to complete.</div>
+                            <div class="movement">
+                                <table class="movement-table">
+                                    <tr>
+                                        <th class="movement-header-backward">↓ BACKWARD</th>
+                                        <th class="movement-header-forward">↑ FORWARD</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="movement-cell-backward">Resource length presents a major obstacle (-2)</td>
+                                        <td class="movement-cell-forward">You can use it or adapt it to your time (+2)</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Row 2 -->
+                        <div class="space" onclick="markSpace(this)">
+                            <div class="space-number">4</div>
+                            <div class="space-text">The materials you found include engaging multi-level student readings.</div>
+                            <div class="movement">
+                                <table class="movement-table">
+                                    <tr>
+                                        <th class="movement-header-backward">↓ BACKWARD</th>
+                                        <th class="movement-header-forward">↑ FORWARD</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="movement-cell-backward">You don't need these; stay where you are (-0)</td>
+                                        <td class="movement-cell-forward">Your kids will benefit; huge win! (+3)</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="space" onclick="markSpace(this)">
+                            <div class="space-number">5</div>
+                            <div class="space-text">You preview the lesson: 4 pages of teacher instructions, 3 handouts, and student pre-reading.</div>
+                            <div class="movement">
+                                <table class="movement-table">
+                                    <tr>
+                                        <th class="movement-header-backward">↓ BACKWARD</th>
+                                        <th class="movement-header-forward">↑ FORWARD</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="movement-cell-backward">Too complex; you want something simpler (-1)</td>
+                                        <td class="movement-cell-forward">The level of detail helps you teach well (+3)</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="space" onclick="markSpace(this)">
+                            <div class="space-number">6</div>
+                            <div class="space-text">You decide to give these resources a try, but a new district rule requires principal approval.</div>
+                            <div class="movement">
+                                <table class="movement-table">
+                                    <tr>
+                                        <th class="movement-header-backward">↓ BACKWARD</th>
+                                        <th class="movement-header-forward">↑ FORWARD</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="movement-cell-backward">Seems unlikely from your view (-1)</td>
+                                        <td class="movement-cell-forward">It's likely you'll be able to make the switch (+2)</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="space" onclick="markSpace(this)">
+                            <div class="space-number">7</div>
+                            <div class="space-text">It's Sunday night. The new materials require you to watch a 10-minute tutorial and try a new teaching strategy.</div>
+                            <div class="movement">
+                                <table class="movement-table">
+                                    <tr>
+                                        <th class="movement-header-backward">↓ BACKWARD</th>
+                                        <th class="movement-header-forward">↑ FORWARD</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="movement-cell-backward">Impossible with the way you plan (-2)</td>
+                                        <td class="movement-cell-forward">You invest the time; it will be worth it (+2)</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Row 3 -->
+                        <div class="space" onclick="markSpace(this)">
+                            <div class="space-number">8</div>
+                            <div class="space-text">The lesson you decided to use includes student-facing digital games and interactive activities.</div>
+                            <div class="movement">
+                                <table class="movement-table">
+                                    <tr>
+                                        <th class="movement-header-backward">↓ BACKWARD</th>
+                                        <th class="movement-header-forward">↑ FORWARD</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="movement-cell-backward">You likely won't use this type of interactivity (-1)</td>
+                                        <td class="movement-cell-forward">This is huge win for your students (+2)</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="space" onclick="markSpace(this)">
+                            <div class="space-number">9</div>
+                            <div class="space-text">Your principal would like to find a way to boost ELA test scores. You consider using social studies to meet this goal.</div>
+                            <div class="movement">
+                                <table class="movement-table">
+                                    <tr>
+                                        <th class="movement-header-backward">↓ BACKWARD</th>
+                                        <th class="movement-header-forward">↑ FORWARD</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="movement-cell-backward">You eliminate social studies altogether (-2)</td>
+                                        <td class="movement-cell-forward">You can find meaningful ways to integrate ELA and social studies (+3)</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="space" onclick="markSpace(this)">
+                            <div class="space-number">10</div>
+                            <div class="space-text">Your state adopted new inquiry-based standards emphasizing questioning and investigation.</div>
+                            <div class="movement">
+                                <table class="movement-table">
+                                    <tr>
+                                        <th class="movement-header-backward">↓ BACKWARD</th>
+                                        <th class="movement-header-forward">↑ FORWARD</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="movement-cell-backward">This is a major shift from how you teach (-1)</td>
+                                        <td class="movement-cell-forward">This aligns well with your experience and style (+3)</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="space" onclick="markSpace(this)">
+                            <div class="space-number">11</div>
+                            <div class="space-text">A free 60-min webinar is offered online to help you teach inquiry-based social studies.</div>
+                            <div class="movement">
+                                <table class="movement-table">
+                                    <tr>
+                                        <th class="movement-header-backward">↓ BACKWARD</th>
+                                        <th class="movement-header-forward">↑ FORWARD</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="movement-cell-backward">No time and desire for this type of support (-2)</td>
+                                        <td class="movement-cell-forward">You're likely to sign up for this support (+3)</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Row 4 -->
+                        <div class="space" onclick="markSpace(this)">
+                            <div class="space-number">12</div>
+                            <div class="space-text">Your district requires evidence of student learning every 2 weeks.</div>
+                            <div class="movement">
+                                <table class="movement-table">
+                                    <tr>
+                                        <th class="movement-header-backward">↓ BACKWARD</th>
+                                        <th class="movement-header-forward">↑ FORWARD</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="movement-cell-backward">You spend extra time creating these resources (-1)</td>
+                                        <td class="movement-cell-forward">Materials you currently use likely already meet this requirement (+3)</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="space" onclick="markSpace(this)">
+                            <div class="space-number">13</div>
+                            <div class="space-text">Your district pacing guide requires covering 3 units this quarter, and you're already behind.</div>
+                            <div class="movement">
+                                <table class="movement-table">
+                                    <tr>
+                                        <th class="movement-header-backward">↓ BACKWARD</th>
+                                        <th class="movement-header-forward">↑ FORWARD</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="movement-cell-backward">Adjusting at this point will be a nightmare (-2)</td>
+                                        <td class="movement-cell-forward">You see easy places where you can adjust (+3)</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="space" onclick="markSpace(this)">
+                            <div class="space-number">14</div>
+                            <div class="space-text">Parents email asking about your social studies plan for the year.</div>
+                            <div class="movement">
+                                <table class="movement-table">
+                                    <tr>
+                                        <th class="movement-header-backward">↓ BACKWARD</th>
+                                        <th class="movement-header-forward">↑ FORWARD</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="movement-cell-backward">Offering parents insight might present a challenge (-1)</td>
+                                        <td class="movement-cell-forward">Comfortably communicating your plan will be a breeze (+1)</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="space start-finish" onclick="markSpace(this)">
+                            <div class="space-text">✨ FINISH ✨<br>You made it through the journey!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="lounge-section">
+            <h2>☕ Teacher's Lounge - Get Out of Your Jam!</h2>
+            <p class="lounge-description">
+                <strong>Stuck in a loop or need a boost?</strong> Visit the Teacher's Lounge and pick a card! Sometimes teachers need a little support or a lucky break to keep moving forward. Click any card to use it.
+            </p>
+            <div class="card-deck">
+                <div class="lounge-card" onclick="useCard(this, 3)">
+                    <span class="card-icon">📅</span>
+                    <div class="card-text">
+                        Your grade level meeting was canceled today. You get an extra prep period.
+                    </div>
+                    <div class="card-movement">Move ahead 3 spaces</div>
+                </div>
+                
+                <div class="lounge-card" onclick="useCard(this, 1)">
+                    <span class="card-icon">🥐</span>
+                    <div class="card-text">
+                        The PTA brought in pastries and coffee for the staff. You feel appreciated and energized.
+                    </div>
+                    <div class="card-movement">Move ahead 1 space</div>
+                </div>
+                
+                <div class="lounge-card" onclick="useCard(this, 2)">
+                    <span class="card-icon">⭐</span>
+                    <div class="card-text">
+                        Your Principal dropped by your class last week and tells you how much they loved your lesson.
+                    </div>
+                    <div class="card-movement">Move ahead 2 spaces</div>
+                </div>
+                
+                <div class="lounge-card" onclick="useCard(this, 1)">
+                    <span class="card-icon">💬</span>
+                    <div class="card-text">
+                        You have a chance to collaborate with colleagues on how to better facilitate class discussions. You're excited to go try it out.
+                    </div>
+                    <div class="card-movement">Move ahead 1 space</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="debrief">
+            <h2>💭 Debrief Questions (After 10 minutes of play)</h2>
+            <ul>
+                <li>Did your teacher make it?</li>
+                <li>What derailed them?</li>
+                <li>What characteristics from their profile helped or hindered their path?</li>
+                <li>For teachers who didn't make it: How could the iCivics experience keep them on track?</li>
+                <li>For teachers who succeeded: How could we make their journey even easier?</li>
+                <li>Big Picture: How do these insights about who we serve (our users) become org-wide considerations?</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        let currentZoom = 0.85;
+        const zoomStep = 0.2;
+        const minZoom = 0.5;
+        const maxZoom = 1.5;
+        const defaultZoom = 0.85;
+        
+        // Game state
+        let currentPosition = 0;
+        const pathOrder = ['start', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'finish'];
+        
+        // Audio context for sound effects
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Apply default zoom on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            applyZoom();
+            updateCurrentSpace();
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                moveForward();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                moveBackward();
+            } else if (e.key === 'r' || e.key === 'R') {
+                e.preventDefault();
+                resetGame();
+            }
+        });
+        
+        function playSound(isPositive) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            if (isPositive) {
+                // Positive sound: ascending tones
+                oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+                oscillator.frequency.exponentialRampToValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+            } else {
+                // Negative sound: descending tones
+                oscillator.frequency.setValueAtTime(493.88, audioContext.currentTime); // B4
+                oscillator.frequency.exponentialRampToValueAtTime(329.63, audioContext.currentTime + 0.15); // E4
+            }
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
+        }
+        
+        function moveForward() {
+            if (currentPosition < pathOrder.length - 1) {
+                playSound(true);
+                currentPosition++;
+                updateCurrentSpace();
+            }
+        }
+        
+        function moveBackward() {
+            if (currentPosition > 0) {
+                playSound(false);
+                currentPosition--;
+                updateCurrentSpace();
+            }
+        }
+        
+        function moveByAmount(amount) {
+            const newPosition = currentPosition + amount;
+            if (newPosition >= 0 && newPosition < pathOrder.length) {
+                playSound(amount > 0);
+                currentPosition = newPosition;
+                updateCurrentSpace();
+            } else if (newPosition >= pathOrder.length) {
+                playSound(true);
+                currentPosition = pathOrder.length - 1;
+                updateCurrentSpace();
+            }
+        }
+        
+        function resetGame() {
+            currentPosition = 0;
+            document.querySelectorAll('.space').forEach(space => {
+                space.classList.remove('visited', 'current');
+            });
+            updateCurrentSpace();
+        }
+        
+        function updateCurrentSpace() {
+            const allSpaces = document.querySelectorAll('.space');
+            
+            allSpaces.forEach(space => {
+                space.classList.remove('current');
+            });
+            
+            // Find and highlight current space
+            const currentSpaceId = pathOrder[currentPosition];
+            let currentSpace;
+            
+            if (currentSpaceId === 'start' || currentSpaceId === 'finish') {
+                allSpaces.forEach(space => {
+                    if (space.classList.contains('start-finish')) {
+                        const text = space.querySelector('.space-text').textContent.toLowerCase();
+                        if ((currentSpaceId === 'start' && text.includes('hear about')) || 
+                            (currentSpaceId === 'finish' && text.includes('finish'))) {
+                            currentSpace = space;
+                        }
+                    }
+                });
+            } else {
+                allSpaces.forEach(space => {
+                    const numberDiv = space.querySelector('.space-number');
+                    if (numberDiv && numberDiv.textContent === currentSpaceId) {
+                        currentSpace = space;
+                    }
+                });
+            }
+            
+            if (currentSpace) {
+                currentSpace.classList.add('current');
+                currentSpace.classList.add('visited');
+                currentSpace.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        
+        function zoomIn() {
+            if (currentZoom < maxZoom) {
+                currentZoom += zoomStep;
+                applyZoom();
+            }
+        }
+        
+        function zoomOut() {
+            if (currentZoom > minZoom) {
+                currentZoom -= zoomStep;
+                applyZoom();
+            }
+        }
+        
+        function resetZoom() {
+            currentZoom = defaultZoom;
+            applyZoom();
+        }
+        
+        function applyZoom() {
+            const boardWrapper = document.getElementById('boardWrapper');
+            const gameBoard = document.querySelector('.game-board');
+            boardWrapper.style.transform = `scale(${currentZoom})`;
+            
+            // Adjust the game board padding to shrink with the content
+            const basePadding = 30;
+            const adjustedPadding = basePadding * currentZoom;
+            gameBoard.style.padding = `${adjustedPadding}px ${adjustedPadding}px ${basePadding}px ${adjustedPadding}px`;
+        }
+        
+        function markSpace(spaceElement) {
+            // Clicking on a space shows options for movement
+            document.querySelectorAll('.space').forEach(space => {
+                space.classList.remove('current');
+            });
+            
+            spaceElement.classList.add('current');
+            spaceElement.classList.add('visited');
+            
+            // Update position to match clicked space
+            const numberDiv = spaceElement.querySelector('.space-number');
+            if (numberDiv) {
+                const spaceNumber = numberDiv.textContent;
+                currentPosition = pathOrder.indexOf(spaceNumber);
+            } else if (spaceElement.classList.contains('start-finish')) {
+                const text = spaceElement.querySelector('.space-text').textContent.toLowerCase();
+                if (text.includes('hear about')) {
+                    currentPosition = 0;
+                } else if (text.includes('finish')) {
+                    currentPosition = pathOrder.length - 1;
+                }
+            }
+        }
+        
+        function useCard(cardElement, spaces) {
+            cardElement.style.transform = 'scale(1.1)';
+            cardElement.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            cardElement.style.color = 'white';
+            
+            const originalText = cardElement.querySelector('.card-text').innerHTML;
+            cardElement.querySelector('.card-text').innerHTML = `<strong>Card Used! Move ahead ${spaces} space${spaces > 1 ? 's' : ''}!</strong>`;
+            
+            // Move forward by the card amount
+            setTimeout(() => {
+                moveByAmount(spaces);
+            }, 500);
+            
+            setTimeout(() => {
+                cardElement.style.transform = '';
+                cardElement.style.background = 'white';
+                cardElement.style.color = '';
+                cardElement.querySelector('.card-text').innerHTML = originalText;
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
