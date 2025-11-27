@@ -635,7 +635,7 @@
                                     </tr>
                                     <tr>
                                         <td class="movement-cell-backward">You likely won't use this type of interactivity (-1)</td>
-                                        <td class="movement-cell-forward">This is huge win for your students (+2)</td>
+                                        <td class="movement-cell-forward">This is a huge win for your students (+2)</td>
                                     </tr>
                                 </table>
                             </div>
@@ -857,6 +857,33 @@
             oscillator.stop(audioContext.currentTime + 0.2);
         }
         
+        function playSuccessSound() {
+            // Success fanfare: ascending chord progression
+            const times = [0, 0.15, 0.3];
+            const frequencies = [
+                [523.25, 659.25, 783.99], // C5, E5, G5
+                [587.33, 739.99, 880.00], // D5, F#5, A5
+                [659.25, 830.61, 987.77]  // E5, G#5, B5
+            ];
+            
+            times.forEach((time, i) => {
+                frequencies[i].forEach(freq => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime + time);
+                    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime + time);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + time + 0.3);
+                    
+                    oscillator.start(audioContext.currentTime + time);
+                    oscillator.stop(audioContext.currentTime + time + 0.3);
+                });
+            });
+        }
+        
         function moveForward() {
             if (currentPosition < pathOrder.length - 1) {
                 playSound(true);
@@ -928,6 +955,11 @@
                 currentSpace.classList.add('current');
                 currentSpace.classList.add('visited');
                 currentSpace.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Play success sound when reaching the finish
+                if (currentSpaceId === 'finish') {
+                    playSuccessSound();
+                }
             }
         }
         
